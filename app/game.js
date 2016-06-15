@@ -1,12 +1,16 @@
 angular.module('con4', [])
 	.controller('GameController', function($scope){
+		var gc = this;
 		
-		$scope.newGame = function(){
+		gc.newGame = function(){
 			/**
 			 * set victory to false
 			 * $scope.grid = buildGrid();
 			 * This is connect 4 so red plays first
 			 */
+			gc.victory = false;
+			buildGrid();
+			gc.activePlayer = 'red';
 		}
 		
 		function buildGrid(){
@@ -24,13 +28,21 @@ angular.module('con4', [])
 			//$scope.grid = buildGrid();
 			//If your build grid is working correctly you can start up your server to see the grid
 			//drawn to the screen.
+			gc.grid = [];
+			
+			for (row = 0; row < 6; row++) {
+				gc.grid[row] = [];
+				for (col = 0; col < 7; col++) {
+					gc.grid[row][col] = {row: row, col: col, hasToken: false, color: ''};
+				}
+			}
 		}
 		
-		$scope.dropToken = function(col){
+		gc.dropToken = function(col){
 			//The col is passed in from the view
 			//Column is full no space available
 			//Bad Drop
-			if($scope.grid[0][col].hasToken){
+			if(gc.grid[0][col].hasToken){
 				return;
 			}
 			
@@ -41,7 +53,7 @@ angular.module('con4', [])
 			 * found a cell that already has a token
 			 */
 			var row = checkSouth(0, col);
-
+			
 			/**
 			 * Once the row is identified
 			 * set the cell by accessing 
@@ -49,8 +61,14 @@ angular.module('con4', [])
 			 * set cell.hasToken = true
 			 * set cell.color $scope.activePlayer
 			 **/  
+			var cell = gc.grid[row][col]
+			cell.hasToken = true;
+			cell.color = gc.activePlayer;
+			console.log(cell);
 			
 			//endTurn and checkVictory
+			checkVictory(cell);
+			endTurn();
 		}
 		
 		function checkSouth(row, col){
@@ -73,6 +91,19 @@ angular.module('con4', [])
 			 * (***increment row***, then return checkSouth())
 			 * make sure to pass the arguments through
 			 */
+			var bottom = 5;
+			var found;
+			
+			while(!found || !bottom) {
+				row++;
+				if (gc.grid[row][col].hasToken) {
+					found = true;
+					return row-1;
+				} else if (row == bottom) {
+					return row;
+				}
+				checkSouth(row, col);
+			}
 		}
 		
 		function checkVictory(cell){
@@ -143,5 +174,10 @@ angular.module('con4', [])
 			 * 'red' to 'yellow' 
 			 * and 'yellow' to 'red'
 			 */
+			if (gc.activePlayer == 'red') {
+				gc.activePlayer = 'yellow';
+			} else if (gc.activePlayer == 'yellow') {
+				gc.activePlayer = 'red';
+			}
 		}
 	});
